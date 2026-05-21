@@ -374,6 +374,7 @@ server.listen(PORT, () => {
     console.log(`🔌 Socket.io ready for real-time collaboration`);
 });
 
+module.exports = app;
 
 // const express = require('express');
 // const app = express();
