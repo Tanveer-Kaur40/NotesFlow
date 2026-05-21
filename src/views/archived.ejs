@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Archived Notes - NoteFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .header {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .logo h1 { font-size: 24px; color: #007bff; }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+        .nav-links a:hover { background: #e3f2fd; border-radius: 5px; }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .logout-btn:hover { background: #c82333; }
+        .note-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .note-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .note-content { color: #666; margin: 15px 0; }
+        .note-actions { display: flex; gap: 10px; }
+        .btn-small { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-restore { background: #28a745; color: white; }
+        .btn-delete { background: #dc3545; color: white; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .no-notes { text-align: center; color: #999; padding: 50px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>📦 Archived Notes</h1>
+                <div class="nav-links">
+                    <a href="/">🏠 Home</a>
+                    <a href="/notes/recycle-bin">🗑️ Recycle Bin</a>
+                    <a href="/teams">👥 Teams</a>
+                </div>
+            </div>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+
+        <a href="/" class="back-link">← Back to Notes</a>
+
+        <% if (notes && notes.length > 0) { %>
+            <% notes.forEach(note => { %>
+                <div class="note-card">
+                    <div class="note-title"><%= note.title %></div>
+                    <div class="note-content"><%= note.content %></div>
+                    <div class="note-actions">
+                        <form action="/notes/<%= note._id %>/unarchive" method="POST">
+                            <button type="submit" class="btn-small btn-restore">📤 Unarchive</button>
+                        </form>
+                        <form action="/notes/delete/<%= note._id %>" method="POST">
+                            <button type="submit" class="btn-small btn-delete">🗑️ Delete</button>
+                        </form>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="no-notes">📭 No archived notes found!</div>
+        <% } %>
+    </div>
+</body>
+</html>

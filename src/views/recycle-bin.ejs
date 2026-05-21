@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recycle Bin - NoteFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        
+        .header {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .logo h1 { font-size: 24px; color: #dc3545; }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 10px;
+            margin-right: 10px;
+        }
+        .nav-links a:hover { background: #e3f2fd; border-radius: 5px; }
+        .logout-btn {
+            background: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        .logout-btn:hover { background: #c82333; }
+        .note-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border-left: 4px solid #dc3545;
+        }
+        .note-title { font-size: 18px; font-weight: bold; margin-bottom: 10px; }
+        .note-content { color: #666; margin: 15px 0; }
+        .deleted-date { font-size: 12px; color: #999; margin-bottom: 10px; }
+        .note-actions { display: flex; gap: 10px; }
+        .btn-small { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+        .btn-restore { background: #28a745; color: white; }
+        .btn-permanent { background: #dc3545; color: white; }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .no-notes { text-align: center; color: #999; padding: 50px; }
+        .empty-bin {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">
+                <h1>🗑️ Recycle Bin</h1>
+                <div class="nav-links">
+                    <a href="/">🏠 Home</a>
+                    <a href="/notes/archived">📦 Archived</a>
+                    <a href="/teams">👥 Teams</a>
+                </div>
+            </div>
+            <a href="/logout" class="logout-btn">Logout</a>
+        </div>
+
+        <a href="/" class="back-link">← Back to Notes</a>
+
+        <div class="empty-bin">
+            ⚠️ Notes in recycle bin will be permanently deleted after 30 days.
+        </div>
+
+        <% if (notes && notes.length > 0) { %>
+            <% notes.forEach(note => { %>
+                <div class="note-card">
+                    <div class="note-title"><%= note.title %></div>
+                    <div class="deleted-date">
+                        🗑️ Deleted on: <%= formatDate(note.deletedAt) %>
+                    </div>
+                    <div class="note-content"><%= note.content %></div>
+                    <div class="note-actions">
+                        <form action="/notes/restore/<%= note._id %>" method="POST">
+                            <button type="submit" class="btn-small btn-restore">↩️ Restore</button>
+                        </form>
+                        <form action="/notes/permanent-delete/<%= note._id %>" method="POST">
+                            <button type="submit" class="btn-small btn-permanent" onclick="return confirm('Are you sure? This cannot be undone!')">💀 Permanent Delete</button>
+                        </form>
+                    </div>
+                </div>
+            <% }) %>
+        <% } else { %>
+            <div class="no-notes">
+                <p>🗑️ Recycle bin is empty!</p>
+                <p>Deleted notes will appear here.</p>
+            </div>
+        <% } %>
+    </div>
+</body>
+</html>

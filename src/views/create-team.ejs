@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Team - NoteFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        .form-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { margin-bottom: 10px; color: #333; }
+        .subtitle { color: #666; margin-bottom: 30px; }
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        button:hover { background: #0056b3; }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+        .icon-select {
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-card">
+            <h1>🚀 Create New Team</h1>
+            <p class="subtitle">Build a team workspace for shared notes and real-time collaboration</p>
+            
+            <form action="/teams/create" method="POST">
+                <input type="text" name="name" placeholder="Team Name" required>
+                <textarea name="description" rows="3" placeholder="Team Description (optional)"></textarea>
+                
+                <label style="display: block; margin-bottom: 8px; color: #555;">Team Icon</label>
+                <select name="icon" class="icon-select">
+                    <option value="👥">👥 Team</option>
+                    <option value="💼">💼 Work</option>
+                    <option value="🎓">🎓 Study</option>
+                    <option value="🎮">🎮 Gaming</option>
+                    <option value="🎨">🎨 Design</option>
+                    <option value="💻">💻 Coding</option>
+                    <option value="📚">📚 Books</option>
+                    <option value="🏃">🏃 Sports</option>
+                    <option value="🎵">🎵 Music</option>
+                    <option value="🍕">🍕 Food</option>
+                </select>
+                
+                <button type="submit">Create Team →</button>
+            </form>
+            
+            <a href="/teams" class="back-link">← Back to Teams</a>
+        </div>
+    </div>
+</body>
+</html>

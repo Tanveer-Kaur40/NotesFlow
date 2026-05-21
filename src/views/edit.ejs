@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Note - NoteFlow</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+        .container { max-width: 600px; margin: 0 auto; }
+        .edit-card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h2 { margin-bottom: 20px; color: #333; }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        .nav-links a:hover { background: #e3f2fd; }
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: #007bff;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="nav-links">
+            <a href="/">🏠 Home</a>
+            <a href="/teams">👥 Teams</a>
+        </div>
+        <div class="edit-card">
+            <h2>✏️ Edit Note</h2>
+            <form action="/notes/update/<%= note._id %>" method="POST">
+                <input type="text" name="title" value="<%= note.title %>" required>
+                <textarea name="content" rows="8" required><%= note.content %></textarea>
+                <button type="submit">💾 Update Note</button>
+            </form>
+            <a href="/" class="back-link">← Back to Notes</a>
+        </div>
+    </div>
+</body>
+</html>

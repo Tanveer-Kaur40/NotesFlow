@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>
+        <%= team.name %> - Dashboard
+    </title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .team-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .team-icon {
+            font-size: 64px;
+        }
+
+        .team-name {
+            font-size: 32px;
+            margin-top: 10px;
+        }
+
+        .role-badge {
+            background: #ffc107;
+            color: #333;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+        }
+
+        .nav-links a {
+            color: #007bff;
+            text-decoration: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover,
+        .nav-links a.active {
+            background: #e3f2fd;
+        }
+
+        .section-title {
+            margin: 25px 0 15px 0;
+            color: #333;
+        }
+
+        .notes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .note-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .note-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .note-content {
+            color: #666;
+            margin-bottom: 10px;
+        }
+
+        .note-meta {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .member-list {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .member-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            min-width: 100px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .member-avatar {
+            width: 50px;
+            height: 50px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            margin: 0 auto 10px;
+        }
+
+        .member-name {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .member-role {
+            font-size: 11px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .member-role.admin {
+            color: #ffc107;
+        }
+
+        .invite-box {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+        }
+
+        .invite-code {
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+        }
+
+        .btn {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .btn-green {
+            background: #28a745;
+        }
+
+        /* Note Input Box */
+        .create-note-wrapper {
+            max-width: 600px;
+            margin: 0 auto 40px;
+            position: relative;
+        }
+
+        .create-note-box {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+        }
+
+        .create-note-box:focus-within {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border-color: #e5e7eb;
+            transform: translateY(-2px);
+        }
+
+        .create-note-box input {
+            width: 100%; border: none; font-size: 18px; font-weight: 600;
+            outline: none; margin-bottom: 12px; display: none; color: #333;
+        }
+
+        .create-note-box textarea {
+            width: 100%; border: none; font-size: 16px; outline: none;
+            resize: none; color: #333; min-height: 24px; overflow: hidden;
+            font-family: inherit;
+        }
+
+        .create-note-box:focus-within input { display: block; }
+        .create-note-box:focus-within textarea { min-height: 80px; }
+
+        .create-note-footer {
+            display: none; justify-content: flex-end; margin-top: 12px;
+        }
+        .create-note-box:focus-within .create-note-footer { display: flex; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="team-header">
+            <div class="team-icon">
+                <%= team.icon %>
+            </div>
+            <div class="team-name">
+                <%= team.name %>
+            </div>
+            <div class="role-badge">
+                <% if (userRole==='admin' ) { %>
+                    👑 You are Admin
+                    <% } else { %>
+                        👤 You are Member
+                        <% } %>
+            </div>
+        </div>
+
+        <div class="nav-links">
+            <a href="/teams/<%= team._id %>" class="active">📊 Dashboard</a>
+            <a href="/teams/<%= team._id %>/notes">📝 Notes</a>
+            <a href="/teams/<%= team._id %>/members">👥 Members</a>
+            <a href="/teams">← All Teams</a>
+        </div>
+
+        <!-- Add Note Form -->
+        <div class="create-note-wrapper">
+            <form action="/teams/<%= team._id %>/notes/add" method="POST" class="create-note-box">
+                <input type="text" name="title" placeholder="Title" autocomplete="off" required>
+                <textarea name="content" placeholder="Take a note for the team..." oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"></textarea>
+                <div class="create-note-footer">
+                    <button type="submit" class="btn">Add Note</button>
+                </div>
+            </form>
+        </div>
+
+        <h2 class="section-title">📝 Recent Notes</h2>
+        <div class="notes-grid">
+            <% if (notes && notes.length> 0) { %>
+                <% for(var i=0; i < notes.length; i++) { %>
+                    <div class="note-card">
+                        <div class="note-title">
+                            <%= notes[i].title %>
+                        </div>
+                        <div class="note-content">
+                            <%= notes[i].content ? notes[i].content.substring(0, 100) : '' %>
+                        </div>
+                        <div class="note-meta">
+                            By <%= notes[i].createdBy ? notes[i].createdBy.name : 'Unknown' %>
+                        </div>
+                    </div>
+                    <% } %>
+                        <% } else { %>
+                            <p style="color: #999;">No notes yet. <a href="/teams/<%= team._id %>/notes">Create your
+                                    first note!</a></p>
+                            <% } %>
+        </div>
+
+        <!-- ✅ USING team.members DIRECTLY - NO "members" VARIABLE NEEDED -->
+        <h2 class="section-title">👥 Team Members</h2>
+        <div class="member-list">
+            <% if (team.members && team.members.length> 0) { %>
+                <% for(var i=0; i < team.members.length; i++) { var member=team.members[i]; %>
+                    <div class="member-card">
+                        <div class="member-avatar">
+                            <%= member.user && member.user.name ? member.user.name.charAt(0).toUpperCase() : '?' %>
+                        </div>
+                        <div class="member-name">
+                            <%= member.user ? member.user.name : 'Unknown' %>
+                        </div>
+                        <div class="member-role <%= member.role %>">
+                            <%= member.role==='admin' ? '👑 Admin' : '👤 Member' %>
+                        </div>
+                    </div>
+                    <% } %>
+                        <% } else { %>
+                            <p>No members found</p>
+                            <% } %>
+        </div>
+
+        <% if (userRole==='admin' ) { %>
+            <div class="invite-box">
+                <h3>🔗 Invite Members</h3>
+                <p>Share this invite code with others to join your team:</p>
+                <div class="invite-code">
+                    <strong>Invite Code:</strong>
+                    <%= team.inviteCode %>
+                </div>
+                <div class="invite-code">
+                    <strong>Join Link:</strong> http://localhost:5000/teams/join/<%= team.inviteCode %>
+                </div>
+                <button class="btn btn-green" onclick="copyInviteCode()">📋 Copy Invite Code</button>
+            </div>
+            <% } %>
+    </div>
+
+    <script>
+        function copyInviteCode() {
+            const code = '<%= team.inviteCode %>';
+            navigator.clipboard.writeText(code);
+            alert('Invite code copied: ' + code);
+        }
+    </script>
+</body>
+
+</html>

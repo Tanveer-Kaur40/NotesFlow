@@ -1,120 +1,110 @@
+const Note = require('../models/Note');
+const User = require('../models/User');
 
-const notes = require('../data/notes');
-
-// exports.getAllNotes = (req, res) => {
-//     res.json(notes);
-// };
-
-
-exports.getAllNotes = (req, res) => {
-    const activeNotes = notes
-        .filter(n => !n.archived)
-        .sort((a, b) => b.pinned - a.pinned);
-
-    res.json(activeNotes);
-};
-
-
-exports.createNote = (req, res) => {
-    const { title, content } = req.body;
-
-    const newNote = {
-        id: notes.length + 1,
-        title,
-        content,
-        pinned: false,     // ⭐ default
-        archived: false    // ⭐ default
-    };
-
-    notes.push(newNote);
-    res.status(201).json(newNote);
-};
-
-
-
-
-
-exports.updateNote = (req, res) => {
-    const id = parseInt(req.params.id);
-    const { title, content } = req.body;
-
-    const note = notes.find(n => n.id === id);
-
-    if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+// GET ALL (non-archived notes for logged-in user)
+exports.getAllNotes = async (req, res) => {
+    try {
+        const notes = await Note.find({ 
+            user: req.userId,
+            archived: false 
+        }).sort({ pinned: -1 });
+        
+        res.render("index", { notes });
+    } catch (error) {
+        console.log(error);
+        res.send("Error loading notes");
     }
-
-    note.title = title || note.title;
-    note.content = content || note.content;
-
-    res.json(note);
 };
 
-
-exports.deleteNote = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const index = notes.findIndex(note => note.id === id);
-
-    if (index === -1) {
-        return res.status(404).json({ message: "Note not found" });
+// CREATE note with logged-in user
+exports.createNote = async (req, res) => {
+    try {
+        const { title, content } = req.body;
+        
+        await Note.create({
+            title,
+            content,
+            pinned: false,
+            archived: false,
+            user: req.userId  // 👈 Logged-in user ki ID
+        });
+        
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error creating note");
     }
-
-    notes.splice(index, 1);
-    res.json({ message: "Note deleted" });
 };
 
-
-exports.togglePin = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const note = notes.find(n => n.id === id);
-
-    if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+// UPDATE note
+exports.updateNote = async (req, res) => {
+    try {
+        await Note.findByIdAndUpdate(req.params.id, req.body);
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error updating note");
     }
-
-    note.pinned = !note.pinned;
-
-    res.json(note);
 };
 
-
-
-
-exports.archiveNote = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const note = notes.find(n => n.id === id);
-
-    if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+// DELETE note
+exports.deleteNote = async (req, res) => {
+    try {
+        await Note.findByIdAndDelete(req.params.id);
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error deleting note");
     }
-
-    note.archived = true;
-
-    res.json(note);
 };
 
-
-exports.unarchiveNote = (req, res) => {
-    const id = parseInt(req.params.id);
-
-    const note = notes.find(n => n.id === id);
-
-    if (!note) {
-        return res.status(404).json({ message: "Note not found" });
+// PIN / UNPIN note
+exports.togglePin = async (req, res) => {
+    try {
+        const note = await Note.findById(req.params.id);
+        note.pinned = !note.pinned;
+        await note.save();
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error toggling pin");
     }
-
-    note.archived = false;
-
-    res.json(note);
 };
 
-
-
-exports.getArchivedNotes = (req, res) => {
-    const archivedNotes = notes.filter(n => n.archived);
-    res.json(archivedNotes);
+// ARCHIVE note
+exports.archiveNote = async (req, res) => {
+    try {
+        await Note.findByIdAndUpdate(req.params.id, { archived: true });
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error archiving note");
+    }
 };
+
+// UNARCHIVE note
+exports.unarchiveNote = async (req, res) => {
+    try {
+        await Note.findByIdAndUpdate(req.params.id, { archived: false });
+        res.redirect("/");
+    } catch (error) {
+        console.log(error);
+        res.send("Error unarchiving note");
+    }
+};
+
+// GET ARCHIVED NOTES
+exports.getArchivedNotes = async (req, res) => {
+    try {
+        const notes = await Note.find({ 
+            user: req.userId,
+            archived: true 
+        });
+        res.render("index", { notes });
+    } catch (error) {
+        console.log(error);
+        res.send("Error loading archived notes");
+    }
+};
+
 

@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teams - NoteFlow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: var(--surface);
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .nav-brand { font-size: 24px; font-weight: 700; color: var(--primary); text-decoration: none; }
+        
+        .nav-links { display: flex; gap: 20px; align-items: center; }
+        .nav-links a { text-decoration: none; color: var(--text-muted); font-weight: 500; transition: color 0.2s; }
+        .nav-links a:hover, .nav-links a.active { color: var(--primary); }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title { font-size: 32px; font-weight: 700; }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-main);
+        }
+
+        /* Teams Grid */
+        .teams-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        .team-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .team-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: var(--primary);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .team-card:hover {
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+            transform: translateY(-4px);
+            border-color: transparent;
+        }
+
+        .team-card:hover::before { opacity: 1; }
+
+        .team-icon {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: inline-block;
+        }
+
+        .team-name { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+        .team-desc { color: var(--text-muted); font-size: 14px; margin-bottom: 20px; line-height: 1.5; flex: 1; }
+
+        .team-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* Empty States */
+        .empty-state {
+            background: var(--surface);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            margin-bottom: 48px;
+        }
+
+        .join-box {
+            background: var(--surface);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+            max-width: 500px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            outline: none;
+        }
+        
+        .input-group input:focus { border-color: var(--primary); }
+
+        /* Notification Toast */
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--surface);
+            color: var(--text-main);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.2);
+            transform: translateY(150px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-left: 4px solid var(--primary);
+        }
+        .notification.show { transform: translateY(0); opacity: 1; }
+
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="nav-brand">NoteFlow</a>
+        <div class="nav-links">
+            <a href="/">My Notes</a>
+            <a href="/teams" class="active">Teams</a>
+            <a href="/logout" style="color: #ef4444;">Logout</a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="header-section">
+            <h1 class="page-title">Teams</h1>
+            <a href="/teams/create" class="btn">
+                <span style="font-size: 18px;">+</span> Create New Team
+            </a>
+        </div>
+
+        <h2 class="section-title">👑 Teams You Own</h2>
+        <% if (myTeams && myTeams.length > 0) { %>
+            <div class="teams-grid">
+                <% myTeams.forEach(team => { %>
+                    <a href="/teams/<%= team._id %>" class="team-card">
+                        <div class="team-icon"><%= team.icon %></div>
+                        <div class="team-name"><%= team.name %></div>
+                        <div class="team-desc"><%= team.description || 'No description provided.' %></div>
+                        <div class="team-meta">
+                            <span>👥 <%= team.members.length %> Members</span>
+                            <span>Code: <%= team.inviteCode %></span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <div style="font-size: 40px; margin-bottom: 16px;">🤝</div>
+                <h3>You don't own any teams</h3>
+                <p>Create a team to start collaborating with others.</p>
+            </div>
+        <% } %>
+
+        <h2 class="section-title">👤 Teams You've Joined</h2>
+        <% if (joinedTeams && joinedTeams.length > 0) { %>
+            <div class="teams-grid">
+                <% joinedTeams.forEach(team => { %>
+                    <a href="/teams/<%= team._id %>" class="team-card">
+                        <div class="team-icon"><%= team.icon %></div>
+                        <div class="team-name"><%= team.name %></div>
+                        <div class="team-desc"><%= team.description || 'No description provided.' %></div>
+                        <div class="team-meta">
+                            <span>👥 <%= team.members.length %> Members</span>
+                            <span>Member</span>
+                        </div>
+                    </a>
+                <% }) %>
+            </div>
+        <% } else { %>
+            <div class="empty-state">
+                <div style="font-size: 40px; margin-bottom: 16px;">👋</div>
+                <h3>You haven't joined any teams</h3>
+                <p>Enter an invite code below to join an existing team.</p>
+            </div>
+        <% } %>
+
+        <div class="join-box">
+            <h2 class="section-title" style="margin-bottom: 8px;">🔗 Join a Team</h2>
+            <p style="color: var(--text-muted); font-size: 14px;">Enter the 8-character invite code shared by the team admin.</p>
+            <div class="input-group">
+                <input type="text" id="inviteCodeInput" placeholder="e.g. A1B2C3D4" maxlength="8">
+                <button class="btn" onclick="joinTeam()">Join Team</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="notification" id="toast">
+        <span style="font-size: 24px;">🔔</span>
+        <div id="toastContent">
+            <strong>New Invite!</strong><br>
+            <span style="font-size: 14px; color: var(--text-muted);">You were added to a team.</span>
+        </div>
+    </div>
+
+    <script>
+        function joinTeam() {
+            const code = document.getElementById('inviteCodeInput').value.trim();
+            if (code.length > 0) {
+                window.location.href = `/teams/join/${code}`;
+            } else {
+                alert("Please enter a valid invite code.");
+            }
+        }
+
+        // Socket.io for Real-time Notifications
+        const socket = io();
+        const userId = '<%= user._id %>';
+
+        socket.on('connect', () => {
+            console.log("Connected to real-time server");
+        });
+
+        // Listen for when someone invites this user to a team
+        socket.on('team-added', (data) => {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastContent').innerHTML = `
+                <strong>Added to Team!</strong><br>
+                <span style="font-size: 14px; color: var(--text-muted);">You've been added to ${data.teamName}</span>
+                <div style="margin-top: 8px;">
+                    <a href="/teams/${data.teamId}" style="color: var(--primary); text-decoration: none; font-weight: 600; font-size: 14px;">View Team →</a>
+                </div>
+            `;
+            toast.classList.add('show');
+            
+            // Automatically hide after 8 seconds
+            setTimeout(() => {
+                toast.classList.remove('show');
+                // Reload page to show new team
+                setTimeout(() => window.location.reload(), 400);
+            }, 8000);
+        });
+    </script>
+</body>
+</html>

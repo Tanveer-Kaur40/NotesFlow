@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Error - NoteFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .error-container {
+            background: white;
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            max-width: 500px;
+            width: 100%;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .error-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        
+        h1 {
+            font-size: 48px;
+            color: #dc3545;
+            margin-bottom: 15px;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        
+        p {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        
+        .error-code {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 8px;
+            font-family: monospace;
+            color: #dc3545;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .home-btn {
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            display: inline-block;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .home-btn:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .retry-btn {
+            background: #6c757d;
+            color: white;
+            text-decoration: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            display: inline-block;
+            margin-left: 10px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        
+        .retry-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        @media (max-width: 500px) {
+            .error-container {
+                padding: 30px;
+            }
+            
+            h1 {
+                font-size: 36px;
+            }
+            
+            .home-btn, .retry-btn {
+                display: block;
+                margin: 10px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">
+            😵
+        </div>
+        <h1>Oops!</h1>
+        <h2>Something Went Wrong</h2>
+        
+        <div class="error-code">
+            Error: <%= message || 'An unexpected error occurred' %>
+        </div>
+        
+        <p>
+            Don't worry, our team has been notified.<br>
+            Try going back to the home page.
+        </p>
+        
+        <a href="/" class="home-btn">🏠 Go Back Home</a>
+        <button onclick="location.reload()" class="retry-btn">🔄 Retry</button>
+    </div>
+</body>
+</html>

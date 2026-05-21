@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>
+        <%= team.name %> - Members
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f3f4f6;
+            --surface: #ffffff;
+            --text-main: #1f2937;
+            --text-muted: #6b7280;
+            --border: #e5e7eb;
+            --danger: #ef4444;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 16px;
+            z-index: 10;
+            box-shadow: 2px 0 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .team-profile {
+            text-align: center;
+            padding-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .team-icon {
+            font-size: 56px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+        }
+
+        .team-name {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background-color: #eef2ff;
+            color: var(--primary);
+        }
+
+        .nav-link.back {
+            margin-top: auto;
+            color: var(--text-muted);
+        }
+
+        .nav-link.back:hover {
+            background-color: #f3f4f6;
+            color: var(--text-main);
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .header-bar {
+            background: var(--surface);
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, transform 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        .btn-outline:hover {
+            background: #f3f4f6;
+            border-color: var(--text-muted);
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .btn-warning {
+            background: #fef3c7;
+            color: var(--warning);
+        }
+
+        .btn-warning:hover {
+            background: #fde68a;
+        }
+
+        .content-area {
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* Invite Card */
+        .invite-card {
+            background: var(--surface);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            align-items: stretch;
+        }
+
+        .invite-section {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .invite-divider {
+            width: 1px;
+            background: var(--border);
+            margin: 0 12px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .input-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .code-box {
+            background: #f8fafc;
+            padding: 12px 16px;
+            border: 1px dashed #cbd5e1;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 18px;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-align: center;
+            color: var(--primary);
+            flex: 1;
+        }
+
+        /* Members List */
+        .member-list {
+            background: var(--surface);
+            border-radius: 16px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .member-list-header {
+            padding: 20px 24px;
+            background: #f8fafc;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .member-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.2s;
+        }
+
+        .member-item:hover {
+            background: #f8fafc;
+        }
+
+        .member-item:last-child {
+            border-bottom: none;
+        }
+
+        .member-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .member-avatar {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 18px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .member-details strong {
+            font-size: 16px;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .member-details small {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .admin-badge {
+            background: #fef3c7;
+            color: #b45309;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .member-actions {
+            display: flex;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="team-profile">
+            <div class="team-icon">
+                <%= team.icon %>
+            </div>
+            <div class="team-name">
+                <%= team.name %>
+            </div>
+            <div class="role-badge"
+                style="background: <%= userRole === 'admin' ? '#fef3c7' : '#e0e7ff' %>; color: <%= userRole === 'admin' ? '#b45309' : '#3730a3' %>;">
+                <%= userRole==='admin' ? '👑 Admin' : '👤 Member' %>
+            </div>z
+        </div>
+
+        <a href="/teams/<%= team._id %>" class="nav-link">
+            <span style="margin-right: 12px;">📊</span> Dashboard
+        </a>
+        <a href="/teams/<%= team._id %>/members" class="nav-link active">
+            <span style="margin-right: 12px;">👥</span> Members (<%= members ? members.length : 0 %>)
+        </a>
+
+        <a href="/teams" class="nav-link back">
+            <span style="margin-right: 12px;">←</span> Back to Teams
+        </a>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="header-bar">
+            <div class="header-title">Team Members</div>
+        </div>
+
+        <div class="content-area">
+
+            <% if (userRole==='admin' ) { %>
+                <div class="invite-card">
+                    <div class="invite-section">
+                        <div class="section-title">✉️ Invite via Email</div>
+                        <form action="/teams/<%= team._id %>/members/invite" method="POST" class="input-group">
+                            <input type="email" name="email" placeholder="colleague@example.com" required>
+                            <button type="submit" class="btn">Send Invite</button>
+                        </form>
+                    </div>
+
+                    <div class="invite-divider"></div>
+
+                    <div class="invite-section">
+                        <div class="section-title">🔗 Share Invite Code</div>
+                        <div class="input-group">
+                            <div class="code-box" id="teamCode">
+                                <%= team.inviteCode %>
+                            </div>
+                            <button type="button" class="btn btn-outline" onclick="copyCode()">📋 Copy</button>
+                        </div>
+                    </div>
+                </div>
+                <% } %>
+
+                    <div class="member-list">
+                        <div class="member-list-header">
+                            Current Members (<%= members ? members.length : 0 %>)
+                        </div>
+
+                        <% if (members && members.length> 0) { %>
+                            <% members.forEach(member=> { %>
+                                <div class="member-item">
+                                    <div class="member-info">
+                                        <div class="member-avatar">
+                                            <%= member.user && member.user.name ?
+                                                member.user.name.charAt(0).toUpperCase() : 'U' %>
+                                        </div>
+                                        <div class="member-details">
+                                            <strong>
+                                                <%= member.user ? member.user.name : 'Unknown User' %>
+                                                    <% if (member.role==='admin' ) { %>
+                                                        <span class="admin-badge">👑 Admin</span>
+                                                        <% } %>
+                                            </strong>
+                                            <small>
+                                                <%= member.user ? member.user.email : '' %>
+                                            </small>
+                                        </div>
+                                    </div>
+
+                                    <div class="member-actions">
+                                        <% if (userRole==='admin' && member.role !=='admin' ) { %>
+                                            <form
+                                                action="/teams/<%= team._id %>/members/make-admin/<%= member.user._id %>"
+                                                method="POST" style="margin: 0;">
+                                                <button type="submit" class="btn btn-warning"
+                                                    onclick="return confirm('Promote to Admin?')">Make Admin</button>
+                                            </form>
+                                            <form action="/teams/<%= team._id %>/members/remove/<%= member.user._id %>"
+                                                method="POST" style="margin: 0;">
+                                                <button type="submit" class="btn btn-danger"
+                                                    onclick="return confirm('Remove this member?')">Remove</button>
+                                            </form>
+                                            <% } %>
+
+                                                <% if (member.user && member.user._id.toString()===user._id.toString()
+                                                    && members.length> 1) { %>
+                                                    <form action="/teams/<%= team._id %>/leave" method="POST"
+                                                        style="margin: 0;">
+                                                        <button type="submit" class="btn btn-danger"
+                                                            onclick="return confirm('Leave this team permanently?')">Leave
+                                                            Team</button>
+                                                    </form>
+                                                    <% } %>
+                                    </div>
+                                </div>
+                                <% }) %>
+                                    <% } else { %>
+                                        <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+                                            No members found.
+                                        </div>
+                                        <% } %>
+                    </div>
+
+        </div>
+    </div>
+
+    <script>
+        function copyCode() {
+            const code = document.getElementById('teamCode').innerText;
+            navigator.clipboard.writeText(code);
+            alert('Invite code copied: ' + code);
+        }
+    </script>
+</body>
+
+</html>
